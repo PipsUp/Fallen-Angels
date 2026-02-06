@@ -1,0 +1,5 @@
+# Add your Solana token addresses here, one per line
+# Example:
+# 4TyZGqRLG3VcHTGMcLBoPUmqYitMVojXinAmkL8xpump
+
+4TyZGqRLG3VcHTGMcLBoPUmqYitMVojXinAmkL8xpump

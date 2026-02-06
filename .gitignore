@@ -1,0 +1,24 @@
+# API Keys and sensitive config
+config.json
+
+# Data files - user-specific
+data/
+*.json
+
+# Logs
+*.log
+npm-debug.log*
+
+# Dependencies
+node_modules/
+
+# OS Files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
