@@ -3,7 +3,6 @@ config.json
 
 # Data files - user-specific
 data/
-*.json
 
 # Logs
 *.log

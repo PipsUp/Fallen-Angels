@@ -1,0 +1,25 @@
+{
+  "name": "fallen-angels-bot",
+  "version": "1.0.0",
+  "description": "Solana Meme Coin Volume Spike Detector",
+  "main": "src/fetch-token-data.js",
+  "scripts": {
+    "start": "node src/fetch-token-data.js",
+    "test": "echo \"No tests yet\" && exit 0"
+  },
+  "keywords": [
+    "solana",
+    "crypto",
+    "meme-coins",
+    "trading-bot",
+    "volume-detector"
+  ],
+  "author": "PipsUp",
+  "license": "MIT",
+  "dependencies": {
+    "node-wav-player": "^1.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
