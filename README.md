@@ -18,12 +18,20 @@ A real-time monitoring bot that detects volume spikes on fallen angel tokens (co
 - Jupiter API key
 - Solana Tracker API key
 
+## 🛠️ API Keys
+
+### Jupiter API
+Get your key at: https://portal.jup.ag/login
+
+### Solana Tracker API
+Get your key at: https://www.solanatracker.io/account/data-api 
+
 ## 🚀 Installation
 
 1. **Clone the repository**
 ```bash
-   git clone https://github.com/yourusername/fallen-angels-bot.git
-   cd fallen-angels-bot
+   git clone https://github.com/PipsUp/Fallen-Angels
+   cd Fallen-Angels
 ```
 
 2. **Install dependencies**
@@ -36,7 +44,7 @@ A real-time monitoring bot that detects volume spikes on fallen angel tokens (co
    cp config.example.json config.json
 ```
    
-   Edit `config.json` with your API keys:
+   Edit `config.json` with your API keys (Do not remove ""):
 ```json
    {
      "jupiterApiKey": "your-jupiter-api-key",
@@ -44,21 +52,18 @@ A real-time monitoring bot that detects volume spikes on fallen angel tokens (co
    }
 ```
 
-4. **Add token addresses to watchlist.txt**
+4. **Add token addresses you would like to monitor to watchlist.txt**
 ```
-   # One token address per line
+   # One token address per line e.g.:
    4TyZGqRLG3VcHTGMcLBoPUmqYitMVojXinAmkL8xpump
    DNnzSTbL8z4x28ji2dDmZKnYAbLf8zcmqiG9UjArpump
 ```
-
-5. **Add sound files**
-   - Place `Wow.wav` in `sounds/` folder (for volume spike alerts)
-   - Place `Alert.wav` in `sounds/` folder (for breakout alerts)
 
 ## 🎮 Usage
 
 **Start the bot:**
 ```bash
+cd Fallen-Angels
 node src/fetch-token-data.js
 ```
 
@@ -121,14 +126,6 @@ const MIN_VOLUME_CHANGE_PERCENT_MICROCAP = 50;      // Micro-cap threshold
 const MIN_MARKET_CAP = 100000;                      // $100k threshold
 const SCAN_INTERVAL_MINUTES = 5;                    // Scan frequency
 ```
-
-## 🛠️ API Keys
-
-### Jupiter API
-Get your key at: https://station.jup.ag/
-
-### Solana Tracker API
-Get your key at: https://docs.solanatracker.io/
 
 ## 📝 License
 
