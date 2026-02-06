@@ -41,10 +41,10 @@ Get your key at: https://www.solanatracker.io/account/data-api
 
 3. **Create config.json**
 ```bash
-   cp config.example.json config.json
+   mv config.example.json config.json
 ```
    
-   Edit `config.json` with your API keys (Do not remove ""):
+   Edit `config.json` with your API keys (Do not remove the quotation marks **" "**):
 ```json
    {
      "jupiterApiKey": "your-jupiter-api-key",
@@ -68,7 +68,7 @@ node src/fetch-token-data.js
 ```
 
 The bot will:
-- Scan every 5 minutes
+- Scan tokens in your watchlist every 5 minutes
 - Show countdown timer
 - Play sound alerts when spikes detected
 - Save all data to `data/` folder
