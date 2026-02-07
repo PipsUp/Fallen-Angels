@@ -36,6 +36,8 @@ const SOLANA_TRACKER_API_KEY = config.solanaTrackerApiKey;
 const MIN_DRAWDOWN_PERCENT = 60;
 const MIN_VOLUME_CHANGE_PERCENT = 15; // For tokens ≥100k mcap
 const MIN_VOLUME_CHANGE_PERCENT_MICROCAP = 50; // For tokens <100k mcap
+const MIN_PRICE_CHANGE_PERCENT = 15; // For tokens ≥100k mcap
+const MIN_PRICE_CHANGE_PERCENT_MICROCAP = 50; // For tokens <100k mcap
 const MIN_MARKET_CAP = 100000; // $100k threshold for regular vs micro-cap
 const SCAN_INTERVAL_MINUTES = 5;
 
@@ -401,15 +403,12 @@ async function filterWatchlist(watchlist) {
   };
 }
 
-// Fetch ATH data from Solana Tracker API (30-day window) with retry
+// Fetch ATH data from Solana Tracker API - NEW simplified endpoint
 async function fetchATHData(tokenAddress, retries = 3) {
   for (let attempt = 1; attempt <= retries; attempt++) {
     try {
-      const timeTo = Math.floor(Date.now() / 1000);
-      const timeFrom = timeTo - (30 * 24 * 60 * 60); // 30 days ago
-      
       const response = await fetch(
-        `https://data.solanatracker.io/price/history/range?token=${tokenAddress}&time_from=${timeFrom}&time_to=${timeTo}`,
+        `https://data.solanatracker.io/tokens/${tokenAddress}/ath`,
         {
           headers: { 'x-api-key': SOLANA_TRACKER_API_KEY }
         }
@@ -427,16 +426,13 @@ async function fetchATHData(tokenAddress, retries = 3) {
         return null;
       }
       
-      // Success! Return the data
+      // Success! Return the data in our format
       return {
-        athPrice: data.price.highest.price,
-        athMarketCap: data.price.highest.marketcap,
-        athTime: new Date(data.price.highest.time * 1000).toISOString(),
-        atlPrice: data.price.lowest.price,
-        atlMarketCap: data.price.lowest.marketcap,
-        atlTime: new Date(data.price.lowest.time * 1000).toISOString(),
-        lastUpdated: new Date().toISOString(),
-        dataRangeDays: 30
+        athPrice: data.highest_price,
+        athMarketCap: data.highest_market_cap,
+        athTime: new Date(data.timestamp).toISOString(),
+        poolId: data.pool_id,
+        lastUpdated: new Date().toISOString()
       };
     } catch (error) {
       console.error(`  ⚠️  Error fetching ATH data (attempt ${attempt}/${retries}): ${error.message}`);
@@ -571,7 +567,26 @@ function detectVolumeSpike(tokenData) {
     };
   }
   
-  // Filter 3: Buy volume must be greater than sell volume
+  // Filter 3: Price change (must be pumping) - different threshold for micro-caps
+  const priceChange = stats1h.priceChange;
+  
+  if (priceChange === null || priceChange === undefined) {
+    return {
+      spikeDetected: false,
+      reason: 'No price change data'
+    };
+  }
+  
+  const requiredPriceChange = isMicroCap ? MIN_PRICE_CHANGE_PERCENT_MICROCAP : MIN_PRICE_CHANGE_PERCENT;
+  
+  if (priceChange < requiredPriceChange) {
+    return {
+      spikeDetected: false,
+      reason: `${isMicroCap ? 'Micro-cap ' : ''}Price change ${priceChange.toFixed(2)}% < ${requiredPriceChange}% threshold`
+    };
+  }
+  
+  // Filter 4: Buy volume must be greater than sell volume
   const buyVolume = stats1h.buyVolume || 0;
   const sellVolume = stats1h.sellVolume || 0;
   
@@ -593,7 +608,7 @@ function detectVolumeSpike(tokenData) {
     sellVolume: sellVolume,
     numBuys: stats1h.numBuys,
     numSells: stats1h.numSells,
-    numTraders: stats1h.numTraders,
+    numTraders: stats1h.numTraaders,
     numNetBuyers: stats1h.numNetBuyers
   };
 }
@@ -995,13 +1010,18 @@ async function runContinuous() {
   console.log('│  ██║  ██║██║ ╚████║╚██████╔╝███████╗███████╗███████║    │');
   console.log('│  ╚═╝  ╚═╝╚═╝  ╚═══╝ ╚═════╝ ╚══════╝╚══════╝╚══════╝    │');
   console.log('│                                                         │');
-  console.log('│              🔥 LIVE MONITORING 🔥                      │');
+  console.log('│                                                         │');
   console.log('│                                                         │');
   console.log('└─────────────────────────────────────────────────────────┘');
+  console.log('───────────────────🔥 LIVE MONITORING 🔥──────────────────');
   console.log(`\n⏰ Scan interval: Every ${SCAN_INTERVAL_MINUTES} minutes`);
-  console.log(`📊 Volume spike detection:`);
-  console.log(`   • Regular tokens (≥$100k): ${MIN_VOLUME_CHANGE_PERCENT}% volume increase`);
-  console.log(`   • Micro-caps (<$100k): ${MIN_VOLUME_CHANGE_PERCENT_MICROCAP}% volume increase`);
+  console.log(`📊 Signal requirements:`);
+  console.log(`   • Regular tokens (≥$100k):`);
+  console.log(`     - Volume up ≥${MIN_VOLUME_CHANGE_PERCENT}%`);
+  console.log(`     - Price up ≥${MIN_PRICE_CHANGE_PERCENT}%`);
+  console.log(`   • Micro-caps (<$100k):`);
+  console.log(`     - Volume up ≥${MIN_VOLUME_CHANGE_PERCENT_MICROCAP}%`);
+  console.log(`     - Price up ≥${MIN_PRICE_CHANGE_PERCENT_MICROCAP}%`);
   console.log(`📉 Targeting tokens down > ${MIN_DRAWDOWN_PERCENT}% from ATH`);
   console.log(`📈 Requires: Buy Volume > Sell Volume`);
   console.log(`🕐 Cooldown: Until next :00 or :30 milestone`);
